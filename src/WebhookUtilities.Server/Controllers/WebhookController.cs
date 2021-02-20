@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using WebhookUtilities.Business;
 using WebhookUtilities.Common;
 using WebhookUtilities.Common.Docker;
 
@@ -11,13 +12,13 @@ namespace WebhookUtilities.Server.Controllers
     [ApiController]
     public class WebhookController : ControllerBase
     {
-        public WebhookController(WebhookConfiguration webhookConfiguration, ILogger<WebhookController> logger)
+        public WebhookController(WebhookProcesser webhookProcesser, ILogger<WebhookController> logger)
         {
-            WebhookConfiguration = webhookConfiguration;
+            WebhookProcesser = webhookProcesser;
             Logger = logger;
         }
 
-        public WebhookConfiguration WebhookConfiguration { get; }
+        public WebhookProcesser WebhookProcesser { get; }
         public ILogger<WebhookController> Logger { get; }
 
         [HttpPost]
@@ -25,7 +26,12 @@ namespace WebhookUtilities.Server.Controllers
         {
             Logger.LogDebug("Token: " + token + " Script Name:" + scriptName + " Request: " + JsonConvert.SerializeObject(dockerRequest));
 
-            var response = await DockerProcesser.Process(dockerRequest, token, scriptName, WebhookConfiguration);
+            var response = await WebhookProcesser.Process(new WebhookRequest<DockerRequestWrapper, DockerResponse>
+            {
+                Request = new DockerRequestWrapper(dockerRequest, scriptName),
+                Token = token
+            });
+
             Logger.LogDebug("Response: " + JsonConvert.SerializeObject(response));
 
             return response;

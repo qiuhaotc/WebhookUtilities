@@ -77,4 +77,16 @@ namespace WebhookUtilities.Common.Docker
         [JsonProperty("repository")]
         public Repository Repository { get; set; }
     }
+
+    public class DockerRequestWrapper
+    {
+        public DockerRequestWrapper(DockerRequest dockerRequest, string scriptName)
+        {
+            DockerRequest = dockerRequest;
+            ScriptName = scriptName;
+        }
+
+        public DockerRequest DockerRequest { get; set; }
+        public string ScriptName { get; set; }
+    }
 }

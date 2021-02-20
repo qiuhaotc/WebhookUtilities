@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-
+    <LangVersion>latest</LangVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WebhookUtilities.Business\WebhookUtilities.Business.csproj" />
     <ProjectReference Include="..\WebhookUtilities.Common\WebhookUtilities.Common.csproj" />
     <ProjectReference Include="..\WebhookUtilities.Server\WebhookUtilities.Server.csproj" />
   </ItemGroup>

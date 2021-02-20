@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using WebhookUtilities.Business;
 using WebhookUtilities.Common;
 
 namespace WebhookUtilities.Server
@@ -37,6 +38,7 @@ namespace WebhookUtilities.Server
             Configuration.Bind("WebhookConfiguration", webhookConfig);
 
             services.AddSingleton(webhookConfig);
+            services.AddSingleton<WebhookProcesser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
