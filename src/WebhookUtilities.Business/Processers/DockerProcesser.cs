@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WebhookUtilities.Common;
@@ -55,6 +54,8 @@ namespace WebhookUtilities.Business
             }
             catch (Exception ex)
             {
+                Logger.LogError("Exception Occur:" + ex);
+
                 return new DockerResponse
                 {
                     State = "error",
@@ -71,23 +72,13 @@ namespace WebhookUtilities.Business
 
         ProcessStartInfo GetProcessStartInfo(FileInfo scriptFileInfo)
         {
-            var argsPrepend = string.Empty;
-            var shellName = "/bin/bash";
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                shellName = "cmd";
-                argsPrepend = "/c ";
-            }
-
             return new ProcessStartInfo
             {
-                FileName = shellName,
-                Arguments = argsPrepend + scriptFileInfo.Name,
+                FileName = scriptFileInfo.FullName,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                WorkingDirectory = scriptFileInfo.DirectoryName
+                WorkingDirectory = scriptFileInfo.DirectoryName,
             };
         }
 
@@ -95,14 +86,14 @@ namespace WebhookUtilities.Business
         {
             return await Task.Run(() =>
             {
-                Logger.LogDebug($"Run Script {processInfo.Arguments.Substring(processInfo.FileName == "cmd" ? 3 : 0)}");
+                Logger.LogInformation($"Run Script {processInfo.FileName}");
 
                 var process = new Process()
                 {
                     StartInfo = processInfo,
                 };
 
-                process.OutputDataReceived += (sender, e) => { if (e.Data != null) Logger.LogDebug(e.Data); };
+                process.OutputDataReceived += (sender, e) => { if (e.Data != null) Logger.LogInformation(e.Data); };
                 process.ErrorDataReceived += (sender, e) => { if (e.Data != null) Logger.LogWarning(e.Data); };
 
                 process.Start();
@@ -114,7 +105,7 @@ namespace WebhookUtilities.Business
 
                 if (process.ExitCode == 0)
                 {
-                    Logger.LogInformation($"Run Script {processInfo.Arguments.Substring(processInfo.FileName == "cmd" ? 3 : 0)} Successful");
+                    Logger.LogInformation($"Run Script {processInfo.FileName} Successful");
 
                     return new DockerResponse
                     {
@@ -124,7 +115,7 @@ namespace WebhookUtilities.Business
                     };
                 }
 
-                Logger.LogWarning($"Run Script {processInfo.Arguments.Substring(processInfo.FileName == "cmd" ? 3 : 0)} Failed With Exit Code: {process.ExitCode}");
+                Logger.LogWarning($"Run Script {processInfo.FileName} Failed With Exit Code: {process.ExitCode}");
 
                 return new DockerResponse
                 {
